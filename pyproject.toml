@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=69.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "k8s-mcp-extension"
+version = "0.1.0"
+description = "MCP server for Kubernetes command execution, node inspection, and diagnostics"
+readme = "README.md"
+requires-python = ">=3.13"
+keywords = ["kubernetes", "mcp", "diagnostics", "operations"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Systems Administration",
+    "Typing :: Typed",
+]
+dependencies = [
+    "kubernetes>=32.0.0",
+    "mcp>=1.22.0",
+    "pydantic>=2.10.0",
+]
+
+[project.scripts]
+k8s-mcp-server = "k8s_mcp_server.__main__:main"
+
+[project.optional-dependencies]
+dev = [
+    "build>=1.2.2",
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.25.0",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.11.0",
+    "twine>=6.1.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+k8s_mcp_server = ["py.typed"]
+
+[tool.ruff]
+line-length = 160
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "A"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+addopts = "-m 'not integration'"
+asyncio_mode = "auto"
+markers = [
+    "integration: marks tests requiring kubectl or a live cluster",
+    "unit: fast isolated tests",
+]
