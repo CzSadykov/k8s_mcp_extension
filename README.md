@@ -25,11 +25,14 @@ The kubeconfig files are resolved relative to `K8S_KUBECONFIG_DIR`, which defaul
 
 ## Example MCP Client Configuration
 
+When installing from PyPI, you can use the package-matched command name `k8s-mcp-extension`.
+The legacy `k8s-mcp-server` command remains available for backward compatibility.
+
 ```json
 {
   "mcpServers": {
     "k8s-server": {
-      "command": "k8s-mcp-server",
+      "command": "k8s-mcp-extension",
       "cwd": "/absolute/path/to/project",
       "env": {
         "K8S_KUBECONFIG_DIR": "/path/to/.kube",
@@ -55,4 +58,11 @@ Run the server locally:
 
 ```bash
 .venv/bin/python -m k8s_mcp_server
+```
+
+After installing the package, either console script works:
+
+```bash
+k8s-mcp-extension
+k8s-mcp-server
 ```

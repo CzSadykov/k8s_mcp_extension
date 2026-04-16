@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "k8s-mcp-extension"
-version = "0.1.0"
+version = "0.1.1"
 description = "MCP server for Kubernetes command execution, node inspection, and diagnostics"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -28,6 +28,7 @@ dependencies = [
 ]
 
 [project.scripts]
+k8s-mcp-extension = "k8s_mcp_server.__main__:main"
 k8s-mcp-server = "k8s_mcp_server.__main__:main"
 
 [project.optional-dependencies]
