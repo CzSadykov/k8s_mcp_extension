@@ -38,6 +38,7 @@ class KubernetesNodeService:
                     "status": condition.status,
                     "reason": condition.reason,
                     "message": condition.message,
+                    "last_transition_time": condition.last_transition_time.isoformat() if condition.last_transition_time else None,
                 }
                 for condition in conditions
             ],
