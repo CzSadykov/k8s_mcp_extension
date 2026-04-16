@@ -1,6 +1,6 @@
 # K8s MCP Server
 
-MCP server for Kubernetes command execution, node inspection, and node-level diagnostics.
+MCP server for Kubernetes command execution, node inspection, and node-level diagnostics. Extension of [k8s-mcp-server](https://github.com/alexei-led/k8s-mcp-server) by alexei-led.
 
 ## Features
 
