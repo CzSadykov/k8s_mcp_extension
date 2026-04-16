@@ -9,6 +9,12 @@ from k8s_mcp_server.tools import LogAnalysisResult
 
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S %Z"
 
+# Inner script for `xargs -I {} sh -c '...'` when reading newest /var/crash dmesg (audit lines excluded).
+_VAR_CRASH_FIND_DMESG = (
+    'if [ -n "{}" ]; then grep -v "audit\\|AUDIT" {}/dmesg.* 2>/dev/null || '
+    'echo "No dmesg files found in {}"; else echo "No crash directories found"; fi'
+)
+
 
 @dataclass(frozen=True)
 class NodeLogCollectionRequest:
@@ -42,10 +48,10 @@ class NodeLogCommandBuilder:
 
         crash_collection = ""
         if request.include_crash_directory:
-            crash_collection = """
+            crash_collection = f"""
 echo '===== /var/crash ====='
 if [ -d /var/crash ]; then
-  find /var/crash -maxdepth 1 -type d | sort -r | head -n 1 | xargs -I {} sh -c 'if [ -n "{}" ]; then grep -v "audit\\|AUDIT" {}/dmesg.* 2>/dev/null || echo "No dmesg files found in {}"; else echo "No crash directories found"; fi'
+  find /var/crash -maxdepth 1 -type d | sort -r | head -n 1 | xargs -I {{}} sh -c '{_VAR_CRASH_FIND_DMESG}'
 else
   echo '/var/crash directory is absent'
 fi
@@ -79,14 +85,14 @@ class NodeCrashLogCommandBuilder:
     def build(self, request: NodeCrashLogCollectionRequest) -> str:
         """Build a shell script for collecting crash logs on a node."""
 
-        return """
+        return f"""
 set -eu
 echo '===== /var/crash ====='
 if [ -d /var/crash ]; then
   echo "Crash directory exists. Contents:"
   ls -la /var/crash
   echo "Detailed crash information (excluding audit entries):"
-  find /var/crash -maxdepth 1 -type d | sort -r | head -n 1 | xargs -I {} sh -c 'if [ -n "{}" ]; then grep -v "audit\\|AUDIT" {}/dmesg.* 2>/dev/null || echo "No dmesg files found in {}"; else echo "No crash directories found"; fi'
+  find /var/crash -maxdepth 1 -type d | sort -r | head -n 1 | xargs -I {{}} sh -c '{_VAR_CRASH_FIND_DMESG}'
 else
   echo '/var/crash directory is absent'
 fi

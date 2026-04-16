@@ -13,7 +13,7 @@ from k8s_mcp_server.cli_executor import check_cli_installed, execute_command, ge
 from k8s_mcp_server.config import DEFAULT_TIMEOUT, INSTRUCTIONS, SUPPORTED_CLI_TOOLS
 from k8s_mcp_server.kubernetes_node import KubernetesNodeService
 from k8s_mcp_server.node_context import NodeContextResolver
-from k8s_mcp_server.node_logs import LogAnalyzer, NodeLogCollectionRequest, NodeCrashLogCollectionRequest, NodeCrashLogCommandBuilder
+from k8s_mcp_server.node_logs import LogAnalyzer, NodeCrashLogCollectionRequest, NodeLogCollectionRequest
 from k8s_mcp_server.node_shell import NodeCommandFactory, NodeDiagnosticsService, SubprocessCommandExecutor
 from k8s_mcp_server.tools import CommandHelpResult, CommandResult, NodeCheckupResult
 
