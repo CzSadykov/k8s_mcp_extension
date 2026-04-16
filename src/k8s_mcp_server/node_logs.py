@@ -20,6 +20,13 @@ class NodeLogCollectionRequest:
     include_crash_directory: bool = True
 
 
+@dataclass(frozen=True)
+class NodeCrashLogCollectionRequest:
+    """Parameters for collecting crash logs from a node."""
+
+    node_name: str
+
+
 class NodeLogCommandBuilder:
     """Build a remote collection script executed through node-shell."""
 
@@ -38,7 +45,7 @@ class NodeLogCommandBuilder:
             crash_collection = """
 echo '===== /var/crash ====='
 if [ -d /var/crash ]; then
-  find /var/crash -maxdepth 2 -type f -print -exec tail -n 200 {} \\;
+  find /var/crash -maxdepth 1 -type d | sort -r | head -n 1 | xargs -I {} sh -c 'if [ -n "{}" ]; then grep -v "audit\\|AUDIT" {}/dmesg.* 2>/dev/null || echo "No dmesg files found in {}"; else echo "No crash directories found"; fi'
 else
   echo '/var/crash directory is absent'
 fi
@@ -59,6 +66,30 @@ test -f /var/log/messages && tail -n 400 /var/log/messages || true
 echo '===== /var/log/kern.log ====='
 test -f /var/log/kern.log && tail -n 400 /var/log/kern.log || true
 {crash_collection}
+""".strip()
+
+
+class NodeCrashLogCommandBuilder:
+    """Build a remote collection script executed through node-shell for crash logs only.
+
+    This builder collects crash logs from /var/crash directory, focusing on dmesg files
+    while excluding audit-related entries to reduce noise in reboot cause analysis.
+    """
+
+    def build(self, request: NodeCrashLogCollectionRequest) -> str:
+        """Build a shell script for collecting crash logs on a node."""
+
+        return """
+set -eu
+echo '===== /var/crash ====='
+if [ -d /var/crash ]; then
+  echo "Crash directory exists. Contents:"
+  ls -la /var/crash
+  echo "Detailed crash information (excluding audit entries):"
+  find /var/crash -maxdepth 1 -type d | sort -r | head -n 1 | xargs -I {} sh -c 'if [ -n "{}" ]; then grep -v "audit\\|AUDIT" {}/dmesg.* 2>/dev/null || echo "No dmesg files found in {}"; else echo "No crash directories found"; fi'
+else
+  echo '/var/crash directory is absent'
+fi
 """.strip()
 
 
