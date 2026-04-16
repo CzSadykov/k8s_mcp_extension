@@ -13,7 +13,7 @@ from k8s_mcp_server.cli_executor import check_cli_installed, execute_command, ge
 from k8s_mcp_server.config import DEFAULT_TIMEOUT, INSTRUCTIONS, SUPPORTED_CLI_TOOLS
 from k8s_mcp_server.kubernetes_node import KubernetesNodeService
 from k8s_mcp_server.node_context import NodeContextResolver
-from k8s_mcp_server.node_logs import LogAnalyzer, NodeLogCollectionRequest
+from k8s_mcp_server.node_logs import LogAnalyzer, NodeLogCollectionRequest, NodeCrashLogCollectionRequest, NodeCrashLogCommandBuilder
 from k8s_mcp_server.node_shell import NodeCommandFactory, NodeDiagnosticsService, SubprocessCommandExecutor
 from k8s_mcp_server.tools import CommandHelpResult, CommandResult, NodeCheckupResult
 
@@ -229,6 +229,21 @@ async def get_logs_on_node(
         "findings": list(result.analysis.findings),
         "raw_logs": result.raw_logs,
     }
+
+
+@mcp.tool(description="Collect crash logs from /var/crash directory on a node.")
+async def get_crash_logs_on_node(
+    node_name: str = Field(description="Node name, for example `node-a-worker-01`"),
+    timeout: int | None = Field(default=None, description="Maximum execution time in seconds"),
+    ctx: Context | None = None,
+) -> dict[str, object]:
+    """Collect crash logs only from /var/crash directory."""
+
+    request = NodeCrashLogCollectionRequest(node_name=node_name)
+    if ctx:
+        await ctx.info(f"Collecting crash logs on node {node_name}")
+    result = await _node_service.collect_crash_logs(request=request, timeout=timeout)
+    return result
 
 
 @mcp.tool(description="Return Kubernetes node status from the cluster selected by node prefix.")

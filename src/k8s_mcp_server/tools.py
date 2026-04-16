@@ -40,8 +40,8 @@ class NodeCheckupResult(TypedDict, total=False):
     kubeconfig: str
     output: str
     raw_output: str
-    error: str
-    details: str
+    error: NotRequired[str]
+    details: NotRequired[str]
 
 
 @dataclass(frozen=True)

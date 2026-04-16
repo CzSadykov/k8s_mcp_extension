@@ -20,12 +20,31 @@ class KubernetesNodeService:
     kubeconfig_dir: str | Path = KUBECONFIG_DIR
 
     def get_node_status(self, node_name: str) -> dict[str, object]:
-        """Return high-level node status and conditions."""
+        """Return high-level node status and conditions.
 
+        Retrieves comprehensive node information including:
+        - Basic node metadata (name, roles, OS image, kubelet version)
+        - Node conditions with their last transition times
+        - Overall readiness status
+
+        Args:
+            node_name: The name of the Kubernetes node to query
+
+        Returns:
+            dict: A dictionary containing node status information including:
+                - name: Node name
+                - cluster_kubeconfig: The kubeconfig file used
+                - roles: Node roles (worker, master, etc.)
+                - os_image: Operating system image
+                - kubelet_version: Kubelet version
+                - conditions: List of node conditions with timestamps
+                - overall_status: High-level readiness status
+        """
         core_api, kubeconfig_path = self._core_api(node_name)
         node = core_api.read_node(node_name)
         conditions = node.status.conditions if node.status and node.status.conditions else []
         ready_status = next((condition.status for condition in conditions if condition.type == "Ready"), "Unknown")
+
         return {
             "name": node.metadata.name,
             "cluster_kubeconfig": kubeconfig_path.name,
@@ -38,6 +57,8 @@ class KubernetesNodeService:
                     "status": condition.status,
                     "reason": condition.reason,
                     "message": condition.message,
+                    # Added last_transition_time to provide accurate timing information for condition changes
+                    "last_transition_time": condition.last_transition_time.isoformat() if condition.last_transition_time else None,
                 }
                 for condition in conditions
             ],
